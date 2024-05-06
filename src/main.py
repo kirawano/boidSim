@@ -3,6 +3,7 @@ import math
 from random import randint
 from boid import Boid
 
+margin = 500
 turnfactor = 0.2
 visualRange = 20
 protectedRange = 2
@@ -17,7 +18,7 @@ boids = []
 bir = [] # <- boids in range
 
 pygame.init()
-screen = pygame.display.set_mode((500,500))
+screen = pygame.display.set_mode((1000,1000))
 running = True
 clock = pygame.time.Clock()
 
@@ -35,22 +36,61 @@ while running:
     
     for boid in boids:
         close_dx = close_dy = 0
+        xvel_avg = yvel_avg = 0
+        tot = 0
+        x_avg = y_avg = 0
         # getting all of the boids in range and such
         for b in boids:
             d = math.sqrt(abs(boid.x - b.x)**2 + abs(boid.y - b.y)**2) 
             if d <= visualRange:
                 bir.append(b)
+            totVx = totVy = 0
+
+            totx = toty = 0
             for B in bir:
                 if d <= protectedRange:
                     close_dx += boid.x - B.x
                     close_dy += boid.y - B.y
                 else:
+                    totVx+=B.vx 
+                    totVy+=B.vy
+                    totx+=B.x 
+                    toty+=B.y
+                    tot+=1
+                    
+            if tot !=0:
+                xvel_avg=totVx/tot
+                yvel_avg=totVy/tot
+                x_avg=totx/tot
+                y_avg=toty/tot
                     
                     
-        boid.vx+=close_dx
-        boid.vy+=close_dy
-        boid.x+=boid.vx*avoidfactor
-        boid.y+=boid.vy*avoidfactor
+        boid.vx+=close_dx*avoidfactor
+        boid.vy+=close_dy*avoidfactor
+        boid.vx+=(xvel_avg-boid.vx)*matchingfactor
+        boid.vy+=(yvel_avg-boid.vy)*matchingfactor
+        boid.vx+=(x_avg-boid.x)*centeringFactor
+        boid.vy+=(y_avg-boid.y)*centeringFactor
+
+        if boid.x < margin:
+            boid.vx=boid.vx + turnfactor
+        if boid.x > w-margin:
+            boid.vx=boid.vx - turnfactor
+        if boid.y < margin:
+            boid.vy=boid.vy + turnfactor
+        if boid.y > h-margin:
+            boid.vy=boid.vy - turnfactor
+
+        speed = math.sqrt(boid.vx**2 + boid.vy**2)
+        if speed>maxspeed and speed!=0:
+            boid.vx = (boid.vx/speed)*maxspeed
+            boid.vy = (boid.vy/speed)*minspeed 
+        if speed<minspeed and speed!=0:
+            boid.vx = (boid.vx/speed)*minspeed 
+            boid.vy = (boid.vy/speed)*minspeed
+
+        boid.x+=boid.vx
+        boid.y+=boid.vy
         pygame.draw.circle(screen, (255,255,255), (boid.x,boid.y), 10)
 
         bir = []
