@@ -3,15 +3,21 @@ import math
 from random import randint
 from boid import Boid
 
+P = Boid(200,200,0,0)
+
 margin = 500
 turnfactor = 0.2
-visualRange = 20
+visualRange = 10
 protectedRange = 2
 centeringFactor = 0.0005
 avoidfactor = 0.05
 matchingfactor = 0.05
 maxspeed = 3
 minspeed = 2
+
+Pfactor = 0.0005
+PAfactor = 5
+Prange = 500
 
 boid_count = 50
 boids = []
@@ -33,6 +39,7 @@ while running:
             running = False
 
     screen.fill("black")
+    XAVG=YAVG=0
     
     for boid in boids:
         close_dx = close_dy = 0
@@ -72,6 +79,10 @@ while running:
         boid.vx+=(x_avg-boid.x)*centeringFactor
         boid.vy+=(y_avg-boid.y)*centeringFactor
 
+        if math.sqrt((boid.x-P.x)**2+(boid.y-P.y)**2) <= Prange:
+            boid.vx+=(boid.x-P.x)*PAfactor
+            boid.vy+=(boid.y-P.y)*PAfactor
+
         if boid.x < margin:
             boid.vx=boid.vx + turnfactor
         if boid.x > w-margin:
@@ -92,9 +103,19 @@ while running:
         boid.x+=boid.vx
         boid.y+=boid.vy
         pygame.draw.circle(screen, (255,255,255), (boid.x,boid.y), 10)
+        XAVG+=boid.x 
+        YAVG+=boid.y
 
         bir = []
 
+    XAVG=(XAVG/boid_count)
+    YAVG=(YAVG/boid_count)
+    #print(str(XAVG)+", "+str(YAVG))
+    P.vx+=(XAVG-P.x)*Pfactor
+    P.vy+=(YAVG-P.y)*Pfactor
+    P.x+=P.vx 
+    P.y+=P.vy
+    pygame.draw.circle(screen, (255,255,0), (P.x,P.y), 30)
 
     pygame.display.flip()
     clock.tick(60)
