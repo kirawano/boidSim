@@ -7,19 +7,21 @@ P = Boid(200,200,0,0)
 
 margin = 500
 turnfactor = 0.2
-visualRange = 10
+visualRange = 30
 protectedRange = 2
 centeringFactor = 0.0005
 avoidfactor = 0.05
 matchingfactor = 0.05
-maxspeed = 3
+maxspeed = 5
 minspeed = 2
 
 Pfactor = 0.0005
-PAfactor = 5
-Prange = 500
+PAfactor = 5000
+Prange = 150
+Pmaxspeed = 20
+Pminspeed = 1
 
-boid_count = 50
+boid_count = 100
 boids = []
 bir = [] # <- boids in range
 
@@ -110,12 +112,29 @@ while running:
 
     XAVG=(XAVG/boid_count)
     YAVG=(YAVG/boid_count)
+    pygame.draw.circle(screen, (0,255,0), (XAVG,YAVG),5)
     #print(str(XAVG)+", "+str(YAVG))
     P.vx+=(XAVG-P.x)*Pfactor
     P.vy+=(YAVG-P.y)*Pfactor
     P.x+=P.vx 
     P.y+=P.vy
-    pygame.draw.circle(screen, (255,255,0), (P.x,P.y), 30)
+    if P.x < margin:
+        P.vx=P.vx + turnfactor
+    if P.x > w-margin:
+        P.vx=P.vx - turnfactor
+    if P.y < margin:
+        P.vy=P.vy + turnfactor
+    if P.y > h-margin:
+        P.vy=P.vy - turnfactor
+
+    speed = math.sqrt(P.vx**2 + P.vy**2)
+    if speed>Pmaxspeed and speed!=0:
+        P.vx = (P.vx/speed)*Pmaxspeed
+        P.vy = (P.vy/speed)*Pminspeed 
+    if speed<Pminspeed and speed!=0:
+        P.vx = (P.vx/speed)*Pminspeed 
+        P.vy = (P.vy/speed)*Pminspeed
+    pygame.draw.circle(screen, (255,0,0), (P.x,P.y), 30)
 
     pygame.display.flip()
     clock.tick(60)
