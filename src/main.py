@@ -3,8 +3,6 @@ import math
 from random import randint
 from boid import Boid
 
-P = Boid(200,200,0,0)
-
 margin = 500
 turnfactor = 0.2
 visualRange = 30
@@ -12,28 +10,32 @@ protectedRange = 2
 centeringFactor = 0.0005
 avoidfactor = 0.05
 matchingfactor = 0.05
-maxspeed = 5
+maxspeed = 7
 minspeed = 2
 
 Pfactor = 0.0005
 PAfactor = 5000
 Prange = 150
-Pmaxspeed = 20
+Pmaxspeed = 15
 Pminspeed = 1
+Pmargin=10
+#Pturnfactor = 0.002
 
 boid_count = 100
 boids = []
 bir = [] # <- boids in range
 
 pygame.init()
-screen = pygame.display.set_mode((1000,1000))
+screen = pygame.display.set_mode((1000,920))
 running = True
 clock = pygame.time.Clock()
 
 w,h = pygame.display.get_surface().get_size()
 
+P = Boid(randint(0,w-10), randint(0,h-10), 0, 0)
+
 for i in range(boid_count):
-    boids.append(Boid(randint(0,w-10), randint(0,h-10), 0, 0))
+    boids.append(Boid(randint(0,w-100), randint(0,h-100), 0, 0))
 
 while running:
     for event in pygame.event.get():
@@ -118,14 +120,14 @@ while running:
     P.vy+=(YAVG-P.y)*Pfactor
     P.x+=P.vx 
     P.y+=P.vy
-    if P.x < margin:
-        P.vx=P.vx + turnfactor
-    if P.x > w-margin:
-        P.vx=P.vx - turnfactor
-    if P.y < margin:
-        P.vy=P.vy + turnfactor
-    if P.y > h-margin:
-        P.vy=P.vy - turnfactor
+    # if P.x < Pmargin:
+    #     P.vx=P.vx + Pturnfactor
+    # if P.x > w-Pmargin:
+    #     P.vx=P.vx - Pturnfactor
+    # if P.y < Pmargin:
+    #     P.vy=P.vy + Pturnfactor
+    # if P.y > h-Pmargin:
+    #     P.vy=P.vy - Pturnfactor
 
     speed = math.sqrt(P.vx**2 + P.vy**2)
     if speed>Pmaxspeed and speed!=0:
